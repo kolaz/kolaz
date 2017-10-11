@@ -494,21 +494,20 @@ class kolaz_Important_Links extends WP_Customize_Control {
         <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 
         <!-- Facebook -->
-        <div id="fb-root"></div>
-        <div id="fb-root"></div>
-        <script>
-            (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=328285627269392";
-            fjs.parentNode.insertBefore(js, fjs);
-            }(document, 'script', 'facebook-jssdk'));
-        </script>
+       <div id="fb-root"></div>
+       <div id="fb-root"></div>
+       <script>(function(d, s, id) {
+               var js, fjs = d.getElementsByTagName(s)[0];
+               if (d.getElementById(id)) return;
+               js = d.createElement(s); js.id = id;
+               js.src = "//connect.facebook.net/bn_IN/sdk.js#xfbml=1&version=v2.10&appId=398038846957674";
+               fjs.parentNode.insertBefore(js, fjs);
+           }(document, 'script', 'facebook-jssdk'));</script>
 
         <div class="inside">
             <div id="social-share">
-              <div class="fb-like" data-href="https://www.facebook.com/kolaz" data-send="false" data-layout="button_count" data-width="90" data-show-faces="true"></div>
+                <div class="fb-like" data-href="https://www.facebook.com/Kolaz-2035287710040856/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+              <!--<div class="fb-like" data-href="https://www.facebook.com/kolaz" data-send="false" data-layout="button_count" data-width="90" data-show-faces="true"></div>-->
               <div class="tw-follow" ><a href="https://twitter.com/KolazTheme" class="twitter-follow-button" data-show-count="false">Follow @kolaz</a></div>
             </div>
             <p><b><a href="http://colorlib.com/wp/support/kolaz"><?php _e('kolaz Documentation','kolaz'); ?></a></b></p>
@@ -516,8 +515,8 @@ class kolaz_Important_Links extends WP_Customize_Control {
             <p><?php _e('If you like this theme, I\'d appreciate any of the following:','kolaz') ?></p>
             <ul>
                 <li><a class="button" href="http://wordpress.org/support/view/theme-reviews/kolaz?filter=5" title="<?php esc_attr_e('Rate this Theme', 'kolaz'); ?>" target="_blank"><?php printf(__('Rate this Theme','kolaz')); ?></a></li>
-                <li><a class="button" href="http://www.facebook.com/KolazTheme" title="Like Kolaz on Facebook" target="_blank"><?php printf(__('Like on Facebook','kolaz')); ?></a></li>
-                <li><a class="button" href="http://twitter.com/kolaz/" title="Follow Kolaz on Twitter" target="_blank"><?php printf(__('Follow on Twitter','kolaz')); ?></a></li>
+                <li><a class="button" href="http://www.facebook.com/Kolaz" title="Like Kolaz on Facebook" target="_blank"><?php printf(__('Like on Facebook','kolaz')); ?></a></li>
+                <li><a class="button" href="http://twitter.com/KolazTheme/" title="Follow Kolaz on Twitter" target="_blank"><?php printf(__('Follow on Twitter','kolaz')); ?></a></li>
             </ul>
         </div><?php
    }
