@@ -109,6 +109,7 @@ cmd_create() { ##HELP create [options] <vmname>
   # domain used to be "lan", but inconsistent with vm name in DNS lookups
   local domain=""
   local passwd=""
+  local arch=""
   local vcpus=2
   local memory=4096
   local disk_def="80G"
@@ -130,6 +131,7 @@ cmd_create() { ##HELP create [options] <vmname>
       --os=*) ostype="$optarg" ;;
       --domain=*) domain="$optarg" ;;
       --passwd=*) passwd="$optarg" ;;
+      --arch=*) arch="$optarg" ;;
       --vcpus=*) vcpus="$optarg" ;;
       --memory=*) memory="$optarg" ;;
       --disk=*) disk_def="$optarg" ;;
@@ -196,12 +198,20 @@ cmd_create() { ##HELP create [options] <vmname>
       ;;
     *) fatal_error "unknown os $2" ;;
   esac
+  if [ -n "$arch" ]; then
+    opts+=("--arch=$arch")
+    if [ "$arch" = "aarch64" ] && [[ "$ostype" =~ debian* ]]; then
+      url=$(echo "$url" | sed 's/amd64/aarch64/')
+    else
+      fatal_error "unsupported arch '$arch' for os '$ostype'"
+    fi
+  fi
   echo "cd $VMDIR/vms" && cd "$VMDIR/vms" || exit 1
   local use_baseimg=false
   if disk_def_is_size "$disk_def"; then
     use_baseimg=true
   fi
-  local osbaseimg=$osvariant.src.qcow2
+  local osbaseimg=$osvariant$arch.src.qcow2
   if ! [ -e "../oses/$osbaseimg" ] && "$use_baseimg"; then
     echo "downloading $osvariant..."
     wget "$url" -O "../oses/$osbaseimg"
@@ -497,7 +507,7 @@ cmd_delete() { ##HELP delete <vmname>
   # depending on snapshot statuses, this doesn't necessarily delete all snapshot storage. But there should be a libvirt message indicating those.
   # Alternatively we could list and delete all snapshots,
   # or rm -f $VMDIR/vms/${vmname}*
-  virsh undefine "$vmname" --remove-all-storage
+  virsh undefine "$vmname" --remove-all-storage --nvram
   # nope: --snapshots-metadata --delete-storage-volume-snapshots
   update_ssh_hosts --del-static="$vmname"
 }
