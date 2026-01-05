@@ -572,8 +572,14 @@ cmd_allow_root() {
 
 pkg_install() {
   local pkg="$1"
-  if ! dnf list installed "$pkg" >/dev/null 2>&1; then
-    sudo dnf -y install "$pkg"
+  if which apt >/dev/null 2>&1; then # debian/ubuntu
+    if ! dpkg -s "$pkg" >/dev/null 2>&1; then
+      sudo apt-get -y install "$pkg"
+    fi
+  else # assume redhat/fedora/centos
+    if ! dnf list installed "$pkg" >/dev/null 2>&1; then
+      sudo dnf -y install "$pkg"
+    fi
   fi
 }
 
@@ -603,7 +609,12 @@ cmd_setup() {
     echo "Include $HOME/.ssh/config.d/vms" >>"$HOME/.ssh/config"
   fi
   # system packages
-  local packages="qemu-img qemu-kvm wget tree libvirt-daemon libvirt-daemon-driver-qemu libvirt-daemon-driver-storage-disk libvirt-daemon-config-network virt-install"
+  local packages="wget tree libvirt-daemon libvirt-daemon-driver-qemu  libvirt-daemon-config-network"
+  if which apt >/dev/null 2>&1; then
+    packages+=" qemu-utils genisoimage libvirt-daemon-system virtinst"
+  else
+    packages+=" qemu-img qemu-kvm libvirt-daemon-driver-storage-disk virt-install"
+  fi
   # optional: virt-manager, guestfs-tools (virt-customize), libvirt-nss
   # shellcheck disable=SC2086
   if [ "$( (dnf list installed $packages 2>/dev/null || true) | tail -n+2 | wc -l)" != 9 ]; then
@@ -629,7 +640,7 @@ cmd_setup() {
     update_ssh_hosts
   fi
   # env&dir
-  set_env "VMDIR" "/home/vms"
+  set_env "VMDIR" "$VMDIR"
   set_env "VIRSH_DEFAULT_CONNECT_URI" "qemu:///system"
   if ! [ -e "$VMDIR" ]; then
     echo "Creating directory '$VMDIR'"
