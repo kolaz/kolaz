@@ -116,6 +116,7 @@ cmd_create() { ##HELP create [options] <vmname>
   local staticip=
   local network="default"
   local cleaniso=false
+  local define_only=false
   local cimode="iso"
   # see also vip_virt.sh for options
   while [ $# -gt 0 ]; do
@@ -124,6 +125,7 @@ cmd_create() { ##HELP create [options] <vmname>
     case "$1" in
       --noshell) noshell=true ;;
       --cleaniso) cleaniso=true ;;
+      --define-only) define_only=true ;;
       --cloud-init=*) cimode="$optarg" ;;
       --allow-root) allow_root=true ;;
       --nest) nest=true ;;
@@ -352,8 +354,13 @@ EOF
   else
     diskarg="$disk_def"
   fi
-  virt-install --connect="$VIRSH_DEFAULT_CONNECT_URI" --import --name="$vmname" --memory="$memory" --vcpus="$vcpus" --os-variant="$osvariant" --disk="$diskarg" "${opts[@]}" --noautoconsole
-
+  local vicmd=(virt-install --connect="$VIRSH_DEFAULT_CONNECT_URI" --import --name="$vmname" --memory="$memory" --vcpus="$vcpus" --os-variant="$osvariant" --disk="$diskarg" "${opts[@]}" --noautoconsole)
+  if "$define_only"; then
+    "${vicmd[@]}" --print-xml | virsh define /dev/stdin
+    exit
+  else
+    "${vicmd[@]}"
+  fi
   # wait for network+ssh to be ready
   if [ -n "$staticip" ]; then # staticip
     update_ssh_hosts --add-static="$vmname,$staticip"
