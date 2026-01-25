@@ -117,6 +117,7 @@ cmd_create() { ##HELP create [options] <vmname>
   local network="default"
   local cleaniso=false
   local define_only=false
+  local has_graphics=false
   local cimode="iso"
   # see also vip_virt.sh for options
   while [ $# -gt 0 ]; do
@@ -126,6 +127,7 @@ cmd_create() { ##HELP create [options] <vmname>
       --noshell) noshell=true ;;
       --cleaniso) cleaniso=true ;;
       --define-only) define_only=true ;;
+      --graphics) has_graphics=true ;;
       --cloud-init=*) cimode="$optarg" ;;
       --allow-root) allow_root=true ;;
       --nest) nest=true ;;
@@ -159,7 +161,6 @@ cmd_create() { ##HELP create [options] <vmname>
   local vmname="$1"
   local osvariant=  # from: virt-install --os-variant list
   local url=        # from web search "<distrib_name> cloud image"
-  local has_graphics=false
   local ethname="eth0"
   local vmgroups='"wheel"'
   local opts=()
