@@ -118,6 +118,8 @@ cmd_create() { ##HELP create [options] <vmname>
   local cleaniso=false
   local define_only=false
   local has_graphics=false
+  local imgsuffix=""
+  local show_console=false
   local cimode="iso"
   # see also vip_virt.sh for options
   while [ $# -gt 0 ]; do
@@ -128,6 +130,10 @@ cmd_create() { ##HELP create [options] <vmname>
       --cleaniso) cleaniso=true ;;
       --define-only) define_only=true ;;
       --graphics) has_graphics=true ;;
+      --console) show_console=true ;;
+      --img=*) imgsuffix="$optarg" ;;
+      # --ui is an alias for graphics+console+img
+      --ui=*) has_graphics=true; show_console=true; imgsuffix="$optarg" ;;
       --cloud-init=*) cimode="$optarg" ;;
       --allow-root) allow_root=true ;;
       --nest) nest=true ;;
@@ -214,11 +220,18 @@ cmd_create() { ##HELP create [options] <vmname>
   if disk_def_is_size "$disk_def"; then
     use_baseimg=true
   fi
-  local osbaseimg=$osvariant$arch.src.qcow2
-  if ! [ -e "../oses/$osbaseimg" ] && "$use_baseimg"; then
+  local osbaseimg="$osvariant$arch.src.qcow2"
+  if "$use_baseimg" && ! [ -e "../oses/$osbaseimg" ]; then
     echo "downloading $osvariant..."
     wget "$url" -O "../oses/$osbaseimg"
     chmod 444 "../oses/$osbaseimg"  # ownership will auto-change to qemu:qemu
+  fi
+  if [ -n "$imgsuffix" ]; then
+    # image names with custom suffixes must be created manually
+    osbaseimg="$osvariant$arch.custom.$imgsuffix.qcow2"
+    if "$use_baseimg" && ! [ -e "../oses/$osbaseimg" ]; then
+      fatal_error "os disk image '$osbaseimg' not found"
+    fi
   fi
   # make cloud-init iso
   # virt-install also now has a --cloud-init parameter
@@ -355,10 +368,19 @@ EOF
   else
     diskarg="$disk_def"
   fi
-  local vicmd=(virt-install --connect="$VIRSH_DEFAULT_CONNECT_URI" --import --name="$vmname" --memory="$memory" --vcpus="$vcpus" --os-variant="$osvariant" --disk="$diskarg" "${opts[@]}" --noautoconsole)
+  if ! $show_console; then
+    opts+=("--noautoconsole")
+    # could alternatively open virt-manager after creation, with:
+    # virt-manager --connect="$VIRSH_DEFAULT_CONNECT_URI" --show-domain-console "$vmname"
+    # or virt-viewer --connect="$VIRSH_DEFAULT_CONNECT_URI" "$vmname"
+  fi
+  local vicmd=(virt-install --connect="$VIRSH_DEFAULT_CONNECT_URI" --import --name="$vmname" --memory="$memory" --vcpus="$vcpus" --os-variant="$osvariant" --disk="$diskarg" "${opts[@]}")
   if "$define_only"; then
     "${vicmd[@]}" --print-xml | virsh define /dev/stdin
     exit
+  elif $show_console; then
+    "${vicmd[@]}" &
+    sleep 5
   else
     "${vicmd[@]}"
   fi
