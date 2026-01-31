@@ -205,7 +205,7 @@ cmd_create() { ##HELP create [options] <vmname>
       # also opensuse "leap", more server-oriented with a slower release cycle
       # sudo zypper install man
       ;;
-    *) fatal_error "unknown os $2" ;;
+    *) fatal_error "unknown os '$ostype'" ;;
   esac
   if [ -n "$arch" ]; then
     opts+=("--arch=$arch")
