@@ -131,6 +131,7 @@ cmd_create() { ##HELP create [options] <vmname>
       --define-only) define_only=true ;;
       --graphics) has_graphics=true ;;
       --console) show_console=true ;;
+      --noconsole) show_console=false ;;
       --img=*) imgsuffix="$optarg" ;;
       # --ui is an alias for graphics+console+img
       --ui=*) has_graphics=true; show_console=true; imgsuffix="$optarg" ;;
