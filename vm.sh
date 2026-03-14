@@ -104,6 +104,7 @@ disk_def_is_size() {
 cmd_create() { ##HELP create [options] <vmname>
   local noshell=false
   local allow_root=false
+  local hostfsdir=""
   local nest=false
   local ostype="centos"
   # domain used to be "lan", but inconsistent with vm name in DNS lookups
@@ -137,6 +138,7 @@ cmd_create() { ##HELP create [options] <vmname>
       --ui=*) has_graphics=true; show_console=true; imgsuffix="$optarg" ;;
       --cloud-init=*) cimode="$optarg" ;;
       --allow-root) allow_root=true ;;
+      --hostfsdir=*) hostfsdir="$optarg" ;;
       --nest) nest=true ;;
       --user=*) VMUSER="$optarg" ;;
       --os=*) ostype="$optarg" ;;
@@ -332,6 +334,13 @@ EOF
   # . virt-install uses qemu:///session by default even with VIRSH_DEFAULT_CONNECT_URI so we need an explicit --connect= :
   if ! $has_graphics; then opts+=("--graphics=none"); fi
   opts+=("--network=$network")
+  # host filesystem dir
+  if [ -n "$hostfsdir" ]; then
+    local host_mount_target=; host_mount_target=$(basename "$hostfsdir")
+    echo "sharing host dir '$hostfsdir', mount target '$host_mount_target'"
+    opts+=("--memorybacking=source.type=memfd,access.mode=shared")
+    opts+=("--filesystem=type=mount,accessmode=passthrough,driver.type=virtiofs,source.dir=$hostfsdir,target.dir=$(basename "$host_mount_target")")
+  fi
   # cloud-init mode
   local ciip=
   local ciport=
