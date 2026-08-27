@@ -516,6 +516,7 @@ cmd_ssh() { ##HELP ssh [options] <vmname> [cmd args..]
 
   # wait for an IPv4 to exist
   if $verbose; then echo "$vmname: waiting for vm IP..."; fi
+  local network= # XXX
   local vmip=
   case "$network" in
     bridge=*) # XXX hacky condition, static & co
